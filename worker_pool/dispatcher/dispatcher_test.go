@@ -1,9 +1,16 @@
-package main
+package dispatcher
 
 import (
 	"fmt"
 	"sync/atomic"
 	"testing"
+
+	"worker-pool/worker_pool/job"
+)
+
+const (
+	WorkersCount = 10
+	InputCount   = 100
 )
 
 type testJob struct {
@@ -30,8 +37,8 @@ func TestDispatcher(t *testing.T) {
 	}
 }
 
-func generateTestInput(doCallCount *uint32) JobQueue {
-	dataChan := make(chan Job)
+func generateTestInput(doCallCount *uint32) job.Queue {
+	dataChan := make(chan job.Job)
 
 	go func() {
 		for i := 0; i < InputCount; i++ {

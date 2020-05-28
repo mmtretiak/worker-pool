@@ -1,4 +1,4 @@
-package main
+package job
 
 import "time"
 
@@ -8,7 +8,7 @@ func NewJob(sleepTime int) Job {
 	}
 }
 
-type JobQueue chan Job
+type Queue chan Job
 
 type Job interface {
 	Do()

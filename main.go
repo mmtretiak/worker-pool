@@ -3,6 +3,9 @@ package main
 import (
 	"math/rand"
 	"time"
+
+	"worker-pool/worker_pool/dispatcher"
+	"worker-pool/worker_pool/job"
 )
 
 const (
@@ -15,18 +18,18 @@ const (
 func main() {
 	inputChan := generateInput()
 
-	dispatcher := NewDispatcher(inputChan, WorkersCount)
+	dispatcher := dispatcher.NewDispatcher(inputChan, WorkersCount)
 
 	doneChan := dispatcher.Start()
 	<-doneChan
 }
 
-func generateInput() JobQueue {
-	dataChan := make(chan Job)
+func generateInput() job.Queue {
+	dataChan := make(chan job.Job)
 
 	go func() {
 		for i := 0; i < InputCount; i++ {
-			dataChan <- NewJob(generateNumber())
+			dataChan <- job.NewJob(generateNumber())
 		}
 
 		close(dataChan)
@@ -36,6 +39,7 @@ func generateInput() JobQueue {
 }
 
 func generateNumber() int {
+	// Use the Seed function to initialize the default Source for different behavior for each run.
 	rand.Seed(time.Now().UnixNano())
 
 	return rand.Intn(MaxNumber-MinNumber) + MinNumber

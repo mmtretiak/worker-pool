@@ -1,6 +1,11 @@
-package main
+package dispatcher
 
-import "sync"
+import (
+	"sync"
+
+	"worker-pool/worker_pool/job"
+	worker2 "worker-pool/worker_pool/worker"
+)
 
 type doneChan chan struct{}
 
@@ -8,11 +13,11 @@ type Dispatcher interface {
 	Start() doneChan
 }
 
-func NewDispatcher(inputChan JobQueue, workersCount int) Dispatcher {
+func NewDispatcher(inputChan job.Queue, workersCount int) Dispatcher {
 	return &dispatcher{
 		workersCount: workersCount,
 		workersWG:    &sync.WaitGroup{},
-		workersChan:  []JobQueue{},
+		workersChan:  []job.Queue{},
 
 		inputChan: inputChan,
 		doneChan:  make(chan struct{}),
@@ -21,10 +26,10 @@ func NewDispatcher(inputChan JobQueue, workersCount int) Dispatcher {
 
 type dispatcher struct {
 	workersCount int
-	workersChan  []JobQueue
+	workersChan  []job.Queue
 	workersWG    *sync.WaitGroup
 
-	inputChan JobQueue
+	inputChan job.Queue
 	doneChan  doneChan
 }
 
@@ -32,7 +37,7 @@ func (d *dispatcher) Start() doneChan {
 	d.workersWG.Add(d.workersCount)
 
 	for i := 0; i < d.workersCount; i++ {
-		worker := NewWorker(d.workersWG)
+		worker := worker2.NewWorker(d.workersWG)
 
 		workerChan := worker.GetInputChan()
 		d.workersChan = append(d.workersChan, workerChan)

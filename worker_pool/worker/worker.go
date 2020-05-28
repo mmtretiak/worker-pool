@@ -1,17 +1,18 @@
-package main
+package worker
 
 import (
-	"fmt"
 	"sync"
+
+	"worker-pool/worker_pool/job"
 )
 
 type Worker interface {
 	Start()
-	GetInputChan() JobQueue
+	GetInputChan() job.Queue
 }
 
 func NewWorker(wg *sync.WaitGroup) Worker {
-	inputChan := make(chan Job)
+	inputChan := make(chan job.Job)
 
 	return &worker{
 		inputChan: inputChan,
@@ -20,7 +21,7 @@ func NewWorker(wg *sync.WaitGroup) Worker {
 }
 
 type worker struct {
-	inputChan JobQueue
+	inputChan job.Queue
 	wg        *sync.WaitGroup
 }
 
@@ -39,6 +40,6 @@ func (w *worker) Start() {
 	}()
 }
 
-func (w *worker) GetInputChan() JobQueue {
+func (w *worker) GetInputChan() job.Queue {
 	return w.inputChan
 }

@@ -30,7 +30,6 @@ func (w *worker) Start() {
 			job, ok := <-w.inputChan
 			// chan closed
 			if !ok {
-				fmt.Println("Exit")
 				w.wg.Done()
 				return
 			}

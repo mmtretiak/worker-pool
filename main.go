@@ -10,7 +10,7 @@ const (
 	WorkersCount = 2
 	InputCount   = 100
 	MinNumber    = 1
-	MaxNumber    = 100
+	MaxNumber    = 10000
 )
 
 func main() {

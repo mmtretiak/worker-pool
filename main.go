@@ -2,13 +2,12 @@ package main
 
 import (
 	"math/rand"
-	"sync"
 	"time"
 )
 
 const (
-	WorkersCount = 2
-	InputCount   = 100
+	WorkersCount = 5
+	InputCount   = 10
 	MinNumber    = 1
 	MaxNumber    = 10000
 )
@@ -16,53 +15,18 @@ const (
 func main() {
 	inputChan := generateInput()
 
-	var workersChannels []chan int
-	var workersWG sync.WaitGroup
+	dispatcher := NewDispatcher(inputChan, WorkersCount)
 
-	workersWG.Add(WorkersCount)
-
-	for i := 0; i < WorkersCount; i++ {
-		workerInput := make(chan int)
-		workersChannels = append(workersChannels, workerInput)
-
-		go func() {
-			for {
-				sleepTime, ok := <-workerInput
-				// chan closed
-				if !ok {
-					workersWG.Done()
-					return
-				}
-
-				time.Sleep(time.Millisecond * time.Duration(sleepTime))
-			}
-		}()
-	}
-
-	for {
-		sleepTime, ok := <-inputChan
-		// chan closed
-		if !ok {
-			for _, workerChan := range workersChannels {
-				close(workerChan)
-			}
-			break
-		}
-
-		for _, workerChan := range workersChannels {
-			workerChan <- sleepTime
-		}
-	}
-
-	workersWG.Wait()
+	doneChan := dispatcher.Start()
+	<-doneChan
 }
 
-func generateInput() chan int {
-	dataChan := make(chan int)
+func generateInput() JobQueue {
+	dataChan := make(chan Job)
 
 	go func() {
 		for i := 0; i < InputCount; i++ {
-			dataChan <- generateNumber()
+			dataChan <- NewJob(generateNumber())
 		}
 
 		close(dataChan)
